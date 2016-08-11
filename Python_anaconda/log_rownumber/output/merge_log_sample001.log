@@ -1,0 +1,12 @@
+timestamp_x	thread	method_x	jobid_x	message_x	row_number	timestamp_y	method_y	jobid_y	message_y	datediff
+2016/08/06 0:47:32	[thread-001]	main	jobid-038	start	1	2016/08/06 0:48:35	main	jobid-039	end	0 days 00:01:03.000000000
+2016/08/06 0:49:42	[thread-004]	main	jobid-038	start	1	2016/08/06 0:50:42	main	jobid-039	end	0 days 00:01:00.000000000
+2016/08/06 0:50:36	[thread-007]	main	jobid-038	start	1	2016/08/06 0:50:53	main	jobid-039	end	0 days 00:00:17.000000000
+2016/08/06 0:50:57	[thread-015]	main	jobid-038	start	1	2016/08/06 0:50:59	main	jobid-039	end	0 days 00:00:02.000000000
+2016/08/06 0:52:55	[thread-018]	main	jobid-038	start	1	2016/08/06 0:54:00	main	jobid-039	end	0 days 00:01:05.000000000
+2016/08/06 0:53:32	[thread-018]	main	jobid-038	start	2	2016/08/06 0:57:02	main	jobid-039	end	0 days 00:03:30.000000000
+2016/08/06 0:54:23	[thread-020]	main	jobid-038	start	1	2016/08/06 0:57:50	main	jobid-039	end	0 days 00:03:27.000000000
+2016/08/06 0:54:48	[thread-020]	main	jobid-038	start	2	2016/08/06 1:58:50	main	jobid-039	end	0 days 01:04:02.000000000
+2016/08/06 0:57:44	[thread-020]	main	jobid-038	start	3	2016/08/06 2:01:50	main	jobid-039	end	0 days 01:04:06.000000000
+2016/08/06 0:57:46	[thread-020]	main	jobid-038	start	4	2016/08/06 2:02:50	main	jobid-039	end	0 days 01:05:04.000000000
+2016/08/06 1:57:32	[thread-091]	main	jobid-038	start	1	2016/08/06 1:59:32	main	jobid-039	end	0 days 00:02:00.000000000
