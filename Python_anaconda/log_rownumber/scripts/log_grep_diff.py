@@ -30,6 +30,27 @@ os.chdir(r"../")
 root_path = os.getcwd()
 os.chdir(r"tmp")
 
+
+# function to grep
+def grep_log(log_path, log_file, str1, str2):
+    ld = open(log_path + '/' + log_file)
+    lines = ld.readlines()
+    ld.close()
+    
+    # remove tmp folder
+    if os.path.exists(root_path + '/tmp/' + log_file + '_grep_tmp.log') :
+        os.remove(root_path + '/tmp/' + log_file + '_grep_tmp.log')
+    else :
+        pass    
+    # write tmp file
+    grep_result = open(root_path + '/tmp/' + log_file + '_grep_tmp.log', 'a')    
+    for line in lines:
+        if line.find(str1) >= 0:
+            grep_result.writelines(line[:-1] + "\n")
+        elif line.find(str2) >= 0:
+            grep_result.writelines(line[:-1] + "\n")
+    grep_result.close()
+        
 # remove output folder
 # check exists
 if os.path.isdir(r'../output'):
@@ -46,7 +67,16 @@ for line in open (u'tmp.log'):
     log_path = os.path.dirname(line)    
     log_file = os.path.basename(line)
     log_file = log_file.rstrip('\n')    
-    os.chdir(log_path)
+#    os.chdir(log_path)
+    
+    # grep before pandas read file
+    grep_log(log_path, log_file, 'jobid-038', 'jobid-039')
+
+    log_path = root_path + '/tmp/'   
+    log_file = log_file + '_grep_tmp.log'
+    os.chdir(log_path)    
+    # grep output path
+    #log_file = root_path + '/tmp/' + log_file + '_grep_tmp.log'
 
     # read target file(tsv)
     log = pd.read_csv(log_file, delimiter='\t' ,header=None)
@@ -54,7 +84,7 @@ for line in open (u'tmp.log'):
     log.columns = ['timestamp','thread','method','jobid','message']    
     
     # grep    
-    log_grep = log[log['jobid'].str.contains('jobid-038|jobid-039')]
+    #log_grep = log[log['jobid'].str.contains('jobid-038|jobid-039')]
     
     # create tsvfile path
     output_tsv_path = root_path + '/output'
@@ -66,22 +96,22 @@ for line in open (u'tmp.log'):
         os.makedirs(output_tsv_path)
     
     # add row_number column in all index
-    log_grep.loc[:, 'row_number'] = float('NaN')
-    log_grep.loc[:, 'row_number'] = log_grep.sort_values(['timestamp'], ascending = True).groupby(['thread','jobid']).cumcount()+1
+    log.loc[:, 'row_number'] = float('NaN')
+    log.loc[:, 'row_number'] = log.sort_values(['timestamp'], ascending = True).groupby(['thread','jobid']).cumcount()+1
     
     # output tsv file(add row_number)
-    log_grep.to_csv(output_tsv_path + '/' + log_file, index = False, sep='\t')
+    log.to_csv(output_tsv_path + '/' + log_file, index = False, sep='\t')
     
     #*************************************************************************#
     # datediff    
     #*************************************************************************#
     # filter start 
-    log_date_start = log_grep.query("jobid == 'jobid-038'")
+    log_date_start = log.query("jobid == 'jobid-038'")
     # regex=True need to replace part of str     
     log_date_start.loc[:, 'timestamp'] = log_date_start.loc[:, 'timestamp'].replace('\[|\]','',regex=True)
    
     # filter end
-    log_date_end = log_grep.query("jobid == 'jobid-039'")
+    log_date_end = log.query("jobid == 'jobid-039'")
     # regex=True need to replace part of str
     log_date_end.loc[:, 'timestamp'] = log_date_end.loc[:, 'timestamp'].replace('\[|\]','',regex=True)
 
@@ -115,7 +145,7 @@ for line in open (u'tmp.log'):
     log_date_summary.columns = ['start_date','elapsed_time']
     
     # prepared resampling 
-    log_date_summary.index = pd.to_datetime(log_date_summary['start_date'], format= '%Y/%m/%d %H:%M:%S')    
+    log_date_summary.index = pd.to_datetime(log_date_summary.ix[:, 'start_date'], format= '%Y/%m/%d %H:%M:%S')    
 
     """ resample **************************************************************  
     S:seconds    
@@ -190,5 +220,3 @@ for line in open (u'tmp.log'):
 
     ax2.plot(x, df_concat['elapsed_time'], color = 'g', alpha=0.5)     
     """
-
-
