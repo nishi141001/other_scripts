@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 ###################################
 # input     :../tmp/.log
+#           :../log/*.*
 # output    :../output/.log
+#           :../graph/*.*
 ###################################
 
 import os
@@ -147,30 +149,35 @@ for line in open (u'tmp.log'):
     log_resampling.columns = ['exection_count', 'elapsed_time_mean', 'elapsed_time_90perile', 'elapsed_time_max']
     log_resampling.to_csv(output_path + '\\resample_' + log_file, index = True, sep='\t')
     
+    # filter between '%H:%M:%S' and '%H:%M:%S' 
+    log_resampling_period = log_resampling.ix[log_resampling.index.indexer_between_time(start_time = '08:00:00', end_time = '21:00:00', include_start = True, include_end = True)]
+    log_resampling_period.to_csv(output_path + '\\priod_resample_' + log_file, index = True, sep='\t')
+    
     #*************************************************************************#
     # create graph
     # log_count, log_date_diff  
     #*************************************************************************#    
 
     # create graph(exection_count)
-    log_resampling.plot.bar(
-                x= [log_resampling.index],
-                y=[r'exection_count'], alpha=0.5, figsize=(16,16)) 
-
+    log_resampling_period.plot.bar(
+                x= [log_resampling_period.index],
+                y= [r'exection_count'], alpha=0.5, figsize=(16,16)) 
+                
     plt.xlabel(r'date') 
-    plt.ylabel('exection_count')
+    plt.ylabel('exection_count')    
     plt.savefig(graph_path + '/exection_count_' + log_file + r'.png', dpi=300)
     plt.close()
     
     # create graph
-    log_resampling.plot.line(
-                x= [log_resampling.index],
-                y=[r'elapsed_time_mean', 
-                   r'elapsed_time_90perile', 
-                   r'elapsed_time_max'], alpha=0.5, figsize=(16,10)) 
+    log_resampling_period.plot.line(
+                x= [log_resampling_period.index],
+                y= [r'elapsed_time_mean', 
+                    r'elapsed_time_90perile', 
+                    r'elapsed_time_max'], alpha=0.5, figsize=(16,10)) 
     
     plt.xlabel(r'date') 
     plt.ylabel('elapsed_time')
     plt.savefig(graph_path + '/elapsed_time_' + log_file + r'.png', dpi=300)
     plt.close()
+
 
