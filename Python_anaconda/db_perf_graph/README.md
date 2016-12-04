@@ -24,3 +24,5 @@
 |02_Stolen_Server_Memory_Breakdown.png|01グラフのStolen_server_Memoryの内訳の一部(主にプランキャッシュ)|
 |03_Cache_hit_ratio_and_Page_life(buffer_Cache)_Breakdown.png|キャッシュヒット率とbuffer_CacheのPage_life|
 
+
+※01_SQL_Server_MaxMemory_Breakdownのグラフ上限は設定しているMaxServerMemoryにあわせて変更すること

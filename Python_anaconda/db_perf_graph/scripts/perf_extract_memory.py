@@ -93,7 +93,7 @@ for line in open (u'tmp.log'):
     ]]
     
     
-    df_perf_db.columns = [r"(PDH-CSV 4.0) (",
+    df_perf_db.columns = [r'(PDH-CSV 4.0) (',
                           r'Memory Manager\Database Cache Memory (MB)', 
                           r'Memory Manager\Stolen Server Memory (MB)',
                           r'Memory Manager\Free Memory (MB)',
@@ -128,34 +128,66 @@ for line in open (u'tmp.log'):
     # create csvfile 
     df_perf_db.to_csv(output_csv_path + '/' + df_perf_file, index = False) 
 
+    df_perf_db.index = pd.to_datetime(df_perf_db.ix[:, r'(PDH-CSV 4.0) ('])    
     # area graph "SQL Server MaxMemory Breakdown"
-    df_perf_db.plot.area(
-                x= [r'(PDH-CSV 4.0) ('],
+    ax = df_perf_db.plot(
+                x= [df_perf_db.index],
                 y= [r'Memory Manager\Database Cache Memory (MB)',
                     r'Memory Manager\Stolen Server Memory (MB)',
                     r'Memory Manager\Free Memory (MB)'
                     ], 
-                    alpha=0.5, figsize=(16,4), stacked = True) 
+                    kind = 'area',            
+                    alpha=0.5, 
+                    figsize=(16,4), 
+                    ylim = (0,2048), 
+                    stacked = True
+                    ) 
+    # 凡例位置:右下
+    ax.legend(loc = 4)
+    ax.set_ylabel("memory(MB)")
+
+    ax2 = ax.twinx()
+    ax3 = df_perf_db.plot(
+                x= [df_perf_db.index],
+                y= [r'Memory Manager\Total Server Memory (MB)'
+                    ], 
+                    kind = 'line',
+                    linestyle = 'dotted', 
+                    alpha=0.5, 
+                    figsize=(16,4), 
+                    color = 'b', 
+                    ylim = (0,2048), 
+                    ax = ax2
+                    )
+    # 凡例位置:右上
+    ax3.legend(loc = 1)
+    ax3.set_ylabel("memory(MB)")
+    
+    # x軸ラベルを90度回転
+    ax.set_xticklabels(df_perf_db.index, rotation = 'vertical')    
+    # x軸目盛り：分間隔(10分)
+    ax.xaxis.set_major_locator(mdates.MinuteLocator(interval = 10))
+    # x軸目盛り表示形式
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%m/%d %H:%M")) 
 
     graph_title = "01_SQL_Server_MaxMemory_Breakdown"
     plt.title(graph_title.decode('mbcs'), size=16)
-    plt.xlabel("time") 
-    plt.ylabel("memory(MB)")
-
-    plt.savefig(output_graph_path + '/' + graph_title + r'.png', dpi=300)
+    plt.savefig(output_graph_path + '/' + graph_title + '_' + df_perf_file + r'.png', dpi=300)
     # 作成したグラフオブジェクトを閉じる    
     plt.close()
-    
 
+    
     # area graph "Stolen Server Memory Breakdown"
     ax = df_perf_db.plot(
-                x= [r'(PDH-CSV 4.0) ('],
+                x= [df_perf_db.index],
                 y= [r'Memory Manager\Stolen Server Memory (MB)'
                     ],
-                    kind = 'area', alpha=0.5, figsize=(16,4)
+                    kind = 'area', 
+                    alpha=0.5, 
+                    figsize=(16,4)
                     )                    
     df_perf_db.plot(
-                x= [r'(PDH-CSV 4.0) ('],
+                x= [df_perf_db.index],
                 y= [r'Memory Manager\Connection Memory (MB)',
                     r'Memory Manager\Lock Memory (MB)',
                     r'Memory Manager\Optimizer Memory (MB)',
@@ -163,7 +195,11 @@ for line in open (u'tmp.log'):
                     r'Plan Cache(_Total)\Cache Memory (MB)',
                     r'Memory Manager\Reserved Server Memory (MB)'
                     ], 
-                    kind = 'area', alpha=0.5, figsize=(16,4), stacked = True, ax = ax
+                    kind = 'area', 
+                    alpha=0.5, 
+                    figsize=(16,4), 
+                    stacked = True, 
+                    ax = ax
                     )
 
     graph_title = "02_Stolen_Server_Memory_Breakdown"
@@ -171,16 +207,27 @@ for line in open (u'tmp.log'):
     plt.xlabel("time") 
     plt.ylabel("memory(MB)")
 
-    plt.savefig(output_graph_path + '/' + graph_title + r'.png', dpi=300)
+    # x軸ラベルを90度回転
+    ax.set_xticklabels(df_perf_db.index, rotation = 'vertical')    
+    # x軸目盛り：分間隔(10分)
+    ax.xaxis.set_major_locator(mdates.MinuteLocator(interval = 10))
+    # x軸目盛り表示形式
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%m/%d %H:%M")) 
+    
+    plt.savefig(output_graph_path + '/' + graph_title + '_' + df_perf_file + r'.png', dpi=300)
     # 作成したグラフオブジェクトを閉じる    
     plt.close()
 
     # line graph "Cache hit ratio and Page life(buffer Cache) Breakdown"
     ax = df_perf_db.plot(
-                x= [r'(PDH-CSV 4.0) ('],
+                x= [df_perf_db.index],
                 y= [r'Buffer Manager\Page life expectancy'
                     ],
-                    kind = 'line', alpha=0.5, figsize=(16,4), color = 'g', ylim = (0,700)
+                    kind = 'line', 
+                    alpha=0.5, 
+                    figsize=(16,4), 
+                    color = 'g', 
+                    ylim = (0,700)
                     )
     ax.legend(loc = 4)
     # 2軸グラフ用に変換
@@ -188,7 +235,7 @@ for line in open (u'tmp.log'):
     ax2 = ax.twinx()
     
     ax3 = df_perf_db.plot(
-                x= [r'(PDH-CSV 4.0) ('],
+                x= [df_perf_db.index],
                 y= [r'Buffer Manager\Buffer cache hit ratio',
                     r'Plan Cache(_Total)\Cache Hit Ratio'
                     ], 
@@ -200,12 +247,19 @@ for line in open (u'tmp.log'):
                     ax = ax2
                     )
     ax3.legend(loc = 1)
+    ax3.set_ylabel("%")
     graph_title = "03_Cache_hit_ratio_and_Page_life(buffer_Cache)_Breakdown"
     plt.title(graph_title.decode('mbcs'), size=16)
-    plt.xlabel("time") 
-    plt.ylabel("%")
 
-    plt.savefig(output_graph_path + '/' + graph_title + r'.png', dpi=300)
+    # x軸ラベルを90度回転
+    ax.set_xticklabels(df_perf_db.index, rotation = 'vertical')    
+    # x軸目盛り：分間隔(10分)
+    ax.xaxis.set_major_locator(mdates.MinuteLocator(interval = 10))
+    # x軸目盛り表示形式
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%m/%d %H:%M")) 
+    
+    plt.savefig(output_graph_path + '/' + graph_title + '_' + df_perf_file + r'.png', dpi=300)
     # 作成したグラフオブジェクトを閉じる    
     plt.close()
+
 
