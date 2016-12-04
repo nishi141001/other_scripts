@@ -100,7 +100,7 @@ for line in open (u'tmp.log'):
     log.loc[:, 'row_number'] = log.sort_values(['timestamp'], ascending = True).groupby(['thread','jobid']).cumcount()+1
     
     # output tsv file(add row_number)
-    log.to_csv(output_tsv_path + '/' + log_file, index = False, sep='\t')
+    #log.to_csv(output_tsv_path + '/' + log_file, index = False, sep='\t')
     
     #*************************************************************************#
     # datediff    
@@ -135,7 +135,7 @@ for line in open (u'tmp.log'):
     log_date_diff =log_date_diff.drop(['row_number', 'method_x', 'method_y', 'message_x', 'message_y',], axis=1)
     
     # output tsvfile
-    log_date_diff.to_csv(output_tsv_path + '/merge_' + log_file, index = False, sep='\t')
+    #log_date_diff.to_csv(output_tsv_path + '/merge_' + log_file, index = False, sep='\t')
         
     #*************************************************************************#
     # summary
@@ -145,8 +145,8 @@ for line in open (u'tmp.log'):
     log_date_summary.columns = ['start_date','elapsed_time']
     
     # prepared resampling 
-    log_date_summary.index = pd.to_datetime(log_date_summary.ix[:, 'start_date'], format= '%Y/%m/%d %H:%M:%S')    
-
+    log_date_summary.index = pd.to_datetime(log_date_summary.ix[:, 'start_date'], format= '%Y/%m/%d %H:%M:%S')
+    
     """ resample **************************************************************  
     S:seconds    
     T:minutes
@@ -163,8 +163,8 @@ for line in open (u'tmp.log'):
     df_elapsed = log_date_summary.ix[:, 'elapsed_time']/np.timedelta64(1, 's')
 
     # per 3minutes
-    df_count = df_date.resample('3T').count()
-    df_elapsed_mean = df_elapsed.resample('3T').mean().fillna(0)
+    df_count = df_date.resample('1T').count()
+    df_elapsed_mean = df_elapsed.resample('1T').mean().fillna(0)
 
     # merge with index
     df_concat = pd.concat([df_count, df_elapsed_mean], axis = 1)
@@ -197,30 +197,52 @@ for line in open (u'tmp.log'):
 
     plt.xlabel(r'time') 
     plt.ylabel('exection_count')
-    plt.savefig(output_graph_path + '/exection_count_' + log_file + r'.png', dpi=300)
+    plt.savefig(output_graph_path + r'/01_exection_count_' + log_file + r'.png', dpi=300)
     plt.close()
     
-    # create graph
+    # create graph(elapsed_time)
     df_concat.plot(
                 x= [df_concat.index],
                 y=[r'elapsed_time'], alpha=0.5, figsize=(16,10)) 
     
     plt.xlabel(r'time') 
     plt.ylabel('elapsed_time')
-    plt.savefig(output_graph_path + '/elapsed_time_' + log_file + r'.png', dpi=300)
+    plt.savefig(output_graph_path + r'/02_elapsed_time_' + log_file + r'.png', dpi=300)
     plt.close()
+    
+    # create graph(merge)
+    ax = df_concat.plot(
+                x = [df_concat.index],
+                y = [r'exection_count'],
+                kind = 'area', 
+                alpha = 0.5, 
+                figsize = (16,4),
+                color = 'g', 
+                ylim = (0,10)
+                ) 
+    # 凡例位置:右下
+    ax.legend(loc = 4)
+    ax.set_ylabel("exection_count")
+    
+    ax2 = ax.twinx()
+    ax3 = df_concat.plot(
+                x = [df_concat.index],
+                y = [r'elapsed_time'], 
+                kind = 'line',
+                alpha = 0.5, 
+                figsize = (16,4), 
+                color = 'b', 
+                ylim = (0,4000), 
+                ax = ax2
+                )
+                
+    # 凡例位置:右上
+    ax3.legend(loc = 1)
+    ax3.set_ylabel("Average_elapsed_time(sec)")
+    graph_title = "03_exection_count_elapsed_time"    
 
+    plt.title(graph_title.decode('mbcs'), size=16)
+    plt.savefig(output_graph_path + r'/' + graph_title + '_' + log_file + r'.png', dpi=300)
+    # 作成したグラフオブジェクトを閉じる    
+    plt.close()
     
-    """
-    fig, ax1 = plt.subplots()
-    
-    # X axis
-    x = df_concat.index
-    
-    ax1.bar(x, df_concat['exection_count'], color= 'b')
-    
-    # relation 2axis
-    ax2 = ax1.twinx()
-
-    ax2.plot(x, df_concat['elapsed_time'], color = 'g', alpha=0.5)     
-    """
