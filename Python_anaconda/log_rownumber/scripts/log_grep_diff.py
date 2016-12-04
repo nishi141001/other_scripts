@@ -171,6 +171,10 @@ for line in open (u'tmp.log'):
 
     df_concat.columns = ['exection_count', 'elapsed_time']
     df_concat.to_csv(output_tsv_path + '/summay_' + log_file, index = True, sep='\t')
+
+    # filter between '%H:%M:%S' and '%H:%M:%S' 
+    df_concat_period = df_concat.ix[df_concat.index.indexer_between_time(start_time = '00:50:00', end_time = '01:00:00', include_start = True, include_end = True)]
+    df_concat_period.to_csv(output_tsv_path + '\\priod_resample_' + log_file, index = True, sep='\t')
     
     #*************************************************************************#
     # create graph
