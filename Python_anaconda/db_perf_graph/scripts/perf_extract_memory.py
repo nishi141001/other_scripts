@@ -138,7 +138,7 @@ for line in open (u'tmp.log'):
                     ], 
                     kind = 'area',            
                     alpha=0.5, 
-                    figsize=(16,4), 
+                    figsize=(16,10), 
                     ylim = (0,2048), 
                     stacked = True
                     ) 
@@ -154,7 +154,7 @@ for line in open (u'tmp.log'):
                     kind = 'line',
                     linestyle = 'dotted', 
                     alpha=0.5, 
-                    figsize=(16,4), 
+                    figsize=(16,10), 
                     color = 'b', 
                     ylim = (0,2048), 
                     ax = ax2
@@ -184,7 +184,7 @@ for line in open (u'tmp.log'):
                     ],
                     kind = 'area', 
                     alpha=0.5, 
-                    figsize=(16,4)
+                    figsize=(16,10)
                     )                    
     df_perf_db.plot(
                 x= [df_perf_db.index],
@@ -197,7 +197,7 @@ for line in open (u'tmp.log'):
                     ], 
                     kind = 'area', 
                     alpha=0.5, 
-                    figsize=(16,4), 
+                    figsize=(16,10), 
                     stacked = True, 
                     ax = ax
                     )

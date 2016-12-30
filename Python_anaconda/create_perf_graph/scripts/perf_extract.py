@@ -69,63 +69,115 @@ for line in open (u'tmp.log'):
         os.makedirs(output_graph_path)
 
     # read csv
-    # 欠損値は平均で穴埋め
     df_perf = pd.read_csv(df_perf_file)
-    df_perf = df_perf.fillna(df_perf.mean())
-
+     
     # extract columns
-    df_perf_db = df_perf[["(PDH-CSV 4.0) (",
-    r"\\YUUSUKE-VAIO\Memory\Available Bytes",
-    r"\\YUUSUKE-VAIO\MSSQL$INS_NISHI2016:Memory Manager\Connection Memory (KB)",
-    r"\\YUUSUKE-VAIO\MSSQL$INS_NISHI2016:Memory Manager\Database Cache Memory (KB)",
-    r"\\YUUSUKE-VAIO\MSSQL$INS_NISHI2016:Memory Manager\Free Memory (KB)",
-    r"\\YUUSUKE-VAIO\MSSQL$INS_NISHI2016:Memory Manager\Granted Workspace Memory (KB)",
-    r"\\YUUSUKE-VAIO\MSSQL$INS_NISHI2016:Memory Manager\Lock Memory (KB)",
-    r"\\YUUSUKE-VAIO\MSSQL$INS_NISHI2016:Memory Manager\Optimizer Memory (KB)",
-    r"\\YUUSUKE-VAIO\MSSQL$INS_NISHI2016:Memory Manager\Reserved Server Memory (KB)",
-    r"\\YUUSUKE-VAIO\MSSQL$INS_NISHI2016:Memory Manager\SQL Cache Memory (KB)",
-    r"\\YUUSUKE-VAIO\MSSQL$INS_NISHI2016:Memory Manager\Stolen Server Memory (KB)",
-    r"\\YUUSUKE-VAIO\MSSQL$INS_NISHI2016:Memory Manager\Log Pool Memory (KB)",
-    r"\\YUUSUKE-VAIO\MSSQL$INS_NISHI2016:Memory Manager\Total Server Memory (KB)",
-    r"\\YUUSUKE-VAIO\MSSQL$INS_NISHI2016:Buffer Manager\Buffer cache hit ratio",
-    r"\\YUUSUKE-VAIO\MSSQL$INS_NISHI2016:Buffer Manager\Page life expectancy",
-    r"\\YUUSUKE-VAIO\MSSQL$INS_NISHI2016:Plan Cache(_Total)\Cache Hit Ratio",
-    r"\\YUUSUKE-VAIO\MSSQL$INS_NISHI2016:Plan Cache(_Total)\Cache Pages"]]
+    df_perf_server = df_perf[[r"(PDH-CSV 4.0) (",
+                              r"\\YUUSUKE-VAIO\Processor(_Total)\% Processor Time",
+                              r"\\YUUSUKE-VAIO\Memory\Available MBytes",
+                              r"\\YUUSUKE-VAIO\Process(sqlservr)\Working Set",
+                              r"\\YUUSUKE-VAIO\Process(_Total)\Working Set"
+                              ]]
     
+    df_perf_server.columns = [r"date",
+                              r"CPU_Usage",
+                              r"Available MBytes",
+                              r"\Process(sqlservr)\Working Set(MB)",
+                              r"\Process(_Total)\Working Set(MB)"
+                              ]
+                              
+    # ""は"欠損値NaNに変換    
+    df_perf_server.ix[:, df_perf_server.columns != r"date"] = df_perf_server.ix[:, df_perf_server.columns != r"date"].replace(r"\s+", np.nan, regex = True)
+    
+    # 欠損値NaNは直後の値で穴埋め
+    df_perf_server = df_perf_server.fillna(method = 'bfill')
+   
+    df_perf_server.ix[:,r"\Process(sqlservr)\Working Set(MB)"] = df_perf_server.ix[:,r"\Process(sqlservr)\Working Set(MB)"] /1024/1024
+    df_perf_server.ix[:,r"\Process(_Total)\Working Set(MB)"] = df_perf_server.ix[:,r"\Process(_Total)\Working Set(MB)"] /1024/1024
+
+    df_perf_server = df_perf_server.set_index(r"date")    
+    df_perf_server.index = pd.to_datetime(df_perf_server.index)    
+    df_perf_server.ix[:, df_perf_server.columns != "date"] =  df_perf_server.ix[:, df_perf_server.columns != "date"] .astype(float)
+
     # create csvfile 
-    df_perf_db.to_csv(output_csv_path + '/' + df_perf_file, index = False) 
+    df_perf_server.to_csv(output_csv_path + '/' + df_perf_file, index = True)     
 
-    # area graph
-    df_perf.plot.area(
-                x= [r"(PDH-CSV 4.0) ("],
-                y=[
-                    r"\\YUUSUKE-VAIO\MSSQL$INS_NISHI2016:Memory Manager\Connection Memory (KB)",
-                    r"\\YUUSUKE-VAIO\MSSQL$INS_NISHI2016:Memory Manager\Lock Memory (KB)",
-                    r"\\YUUSUKE-VAIO\MSSQL$INS_NISHI2016:Memory Manager\Optimizer Memory (KB)",
-                    r"\\YUUSUKE-VAIO\MSSQL$INS_NISHI2016:Memory Manager\SQL Cache Memory (KB)",
-                    r"\\YUUSUKE-VAIO\MSSQL$INS_NISHI2016:Memory Manager\Log Pool Memory (KB)"
-                    ], 
-                    alpha=0.5, figsize=(16,4)) 
-
+    # CPU graph
+    ax = df_perf_server.plot(
+                x= [df_perf_server.index],
+                y= [r"CPU_Usage"], 
+                    kind = 'area',
+                    alpha=0.5, 
+                    figsize=(16,10), 
+                    ylim = (0,100)
+                    ) 
+    ax.set_xticklabels(df_perf_server.index, rotation = 'vertical')    
+    # x軸目盛り：分間隔(10分)
+    ax.xaxis.set_major_locator(mdates.MinuteLocator(interval = 10))
+    # x軸目盛り表示形式
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%m/%d %H:%M")) 
+    
     graph_title = output_graph_file.replace('/s', '_')
     plt.title(graph_title.decode('mbcs'), size=16)
     plt.xlabel("time") 
-    plt.ylabel("memory(KB)")
-
-    """        
-    # x軸主目盛り
-    # 分単位
-    minutes = mdates.MinuteLocator()
-    daysFmt = mdates.DateFormatter('%m/%d/%Y %H:%M:%S')
-    ax.xaxis.set_major_locator(minutes)
-    ax.xaxis.set_major_formatter(daysFmt)
-    """
+    plt.ylabel("CPU_Usage(%)")
     
-    plt.savefig(output_graph_path + '/' + output_graph_file + r'.png', dpi=300)
+    plt.savefig(output_graph_path + '/' + output_graph_file + r'_01_cpu.png', dpi=300)
     
     # 作成したグラフオブジェクトを閉じる    
     plt.close()
     
+    # Memory(Available) graph
+    ax = df_perf_server.plot(
+                x= [df_perf_server.index],
+                y= [r"Available MBytes"], 
+                    kind = 'area',            
+                    alpha=0.5, 
+                    figsize=(16,10), 
+                    ylim = (0,4096), 
+                    stacked = False
+                    ) 
+    ax.set_xticklabels(df_perf_server.index, rotation = 'vertical')    
 
+    # x軸目盛り：分間隔(10分)
+    ax.xaxis.set_major_locator(mdates.MinuteLocator(interval = 10))
+    # x軸目盛り表示形式
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%m/%d %H:%M")) 
+    
+    graph_title = output_graph_file.replace('/s', '_')
+    plt.title(graph_title.decode('mbcs'), size=16)
+    plt.xlabel("time") 
+    plt.ylabel("Available_Memory(MB)")
+    
+    plt.savefig(output_graph_path + '/' + output_graph_file + r'_02_available_memory.png', dpi=300)
+    
+    # 作成したグラフオブジェクトを閉じる    
+    plt.close()
 
+    # Memory(Workingset) graph
+    ax = df_perf_server.plot(
+                x= [df_perf_server.index],
+                y= [r"\Process(sqlservr)\Working Set(MB)",
+                    r"\Process(_Total)\Working Set(MB)"],
+                    kind = 'area',            
+                    alpha=0.5, 
+                    figsize=(16,10), 
+                    ylim = (0,4096), 
+                    stacked = False
+                    ) 
+    ax.set_xticklabels(df_perf_server.index, rotation = 'vertical')    
 
+    # x軸目盛り：分間隔(10分)
+    ax.xaxis.set_major_locator(mdates.MinuteLocator(interval = 10))
+    # x軸目盛り表示形式
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%m/%d %H:%M")) 
+    
+    graph_title = output_graph_file.replace('/s', '_')
+    plt.title(graph_title.decode('mbcs'), size=16)
+    plt.xlabel("time") 
+    plt.ylabel("Memory(MB)")
+    
+    plt.savefig(output_graph_path + '/' + output_graph_file + r'_03_workingset_memory.png', dpi=300)
+    
+    # 作成したグラフオブジェクトを閉じる    
+    plt.close()
