@@ -1,5 +1,5 @@
 # WindowsパフォーマンスコレクターのCSVロググラフ化
-perfmon起動時に含まれる欠損値を補完してグラフ化する。
+perfmon起動時に含まれる欠損値を補完してCPUのみグラフ化する。
 
 ## 実行ファイル
 .\scripts\exec_create_graph.py
@@ -7,7 +7,7 @@ perfmon起動時に含まれる欠損値を補完してグラフ化する。
 ## input
 .\log
 配下のperfmonログの欠損値を直後の値で補完、グラフ化
-※CPUとメモリのグラフ作成用
+※CPUグラフ作成用
 
 ## output
 .\tmp
