@@ -136,7 +136,7 @@ for line in open (u'tmp.log'):
                     r'Memory Manager\Stolen Server Memory (MB)',
                     r'Memory Manager\Free Memory (MB)'
                     ], 
-                    kind = 'area',            
+                    kind = 'area',
                     alpha=0.5, 
                     figsize=(16,10), 
                     ylim = (0,2048), 
@@ -161,7 +161,6 @@ for line in open (u'tmp.log'):
                     )
     # 凡例位置:右上
     ax3.legend(loc = 1)
-    ax3.set_ylabel("memory(MB)")
     
     # x軸ラベルを90度回転
     ax.set_xticklabels(df_perf_db.index, rotation = 'vertical')    
@@ -225,7 +224,7 @@ for line in open (u'tmp.log'):
                     ],
                     kind = 'line', 
                     alpha=0.5, 
-                    figsize=(16,4), 
+                    figsize=(16,10), 
                     color = 'g', 
                     ylim = (0,700)
                     )
@@ -241,7 +240,7 @@ for line in open (u'tmp.log'):
                     ], 
                     kind = 'line',
                     alpha=0.5, 
-                    figsize=(16,4), 
+                    figsize=(16,10), 
                     color = ['b','c'], 
                     ylim = (70,100), 
                     ax = ax2
