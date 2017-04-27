@@ -1,0 +1,5 @@
+SET NOCOUNT ON
+
+SELECT 
+       COUNT([JOB_ID]) AS [Count]
+  FROM [dbo].[JOBS]
