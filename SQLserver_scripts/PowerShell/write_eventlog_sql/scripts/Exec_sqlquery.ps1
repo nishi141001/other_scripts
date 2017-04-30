@@ -2,13 +2,15 @@ $Server = "YUUSUKE-VAIO\INS_NISHI2016"
 $Database = "sales"
 $User = "sa"
 $Password = "system"
-$Basepath =  "C:\Users\yuusuke\Desktop\SQLserver\script_test\"
-$Input_count = $Basepath + "scripts\Sqlquery_count.sql"
-$Input_detail = $Basepath +  "scripts\Sqlquery_detail.sql"
-$Output_detail = $Basepath + "output\Sqlquery_detail.log"
 
 $Hostname = hostname
 $Log_Level = "ERROR"
+
+$Scriptpath = Split-Path $myInvocation.Mycommand.Path -Parent
+$Scriptpath = Split-Path -Parent $Scriptpath
+$Input_count = $Scriptpath + "\scripts\Sqlquery_count.sql"
+$Input_detail = $Scriptpath +  "\scripts\Sqlquery_detail.sql"
+$Output_detail = $Scriptpath + "\output\Sqlquery_detail.log"
 
 # タイムスタンプはyyyy MMM dd HH:mm:ss形式
 $us = New-Object system.globalization.cultureinfo("en-US")
