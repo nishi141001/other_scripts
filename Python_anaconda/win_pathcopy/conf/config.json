@@ -1,0 +1,9 @@
+{
+  "input"   : "input",
+  "output"  : "output",
+  "temp"  : "tmp",
+  "script"  : "scripts",
+  "source"  : "source",
+  "target"  : "target",
+  "input_file"  : "path_copy.txt"
+}
